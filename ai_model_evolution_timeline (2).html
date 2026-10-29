@@ -1,0 +1,1488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Frontier Intelligence Hub</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- React & Babel CDNs -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 antialiased p-2 md:p-6 min-h-screen">
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState } = React;
+
+    const AIModelChart = () => {
+      const [activeTab, setActiveTab] = useState('timeline');
+      const [timelineSpan, setTimelineSpan] = useState('12m'); // 'all' or '12m'
+      const [hoveredPoint, setHoveredPoint] = useState(null);
+      const [pricingScenario, setPricingScenario] = useState('agent');
+      const [selectedBenchmark, setSelectedBenchmark] = useState('all');
+
+      // Controls for the Cost vs. Score Scatter Plot
+      const [costMetric, setCostMetric] = useState('output');
+      const [scatterBenchmark, setScatterBenchmark] = useState('hle');
+      const [hoveredScatterModel, setHoveredScatterModel] = useState(null);
+
+      const data = {
+        OpenAI: [
+          { name: 'GPT-4', date: '2023-03', score: 39.0, isMajor: true },
+          { name: 'GPT-4 Turbo', date: '2023-11', score: 50.0 },
+          { name: 'GPT-4o', date: '2024-05', score: 53.6 },
+          { name: 'o1-preview', date: '2024-09', score: 73.3 },
+          { name: 'o1', date: '2024-12', score: 77.3, isMajor: true },
+          { name: 'GPT-4.5*', date: '2025-02', score: 80.0 },
+          { name: 'o3', date: '2025-04', score: 85.0, isMajor: true },
+          { name: 'GPT-4.1', date: '2025-05', score: 86.0 },
+          { name: 'GPT-5', date: '2025-08', score: 88.5, isMajor: true },
+          { name: 'GPT-5.1', date: '2025-11', score: 89.5 },
+          { name: 'GPT-5.2', date: '2025-12', score: 91.4 },
+          { name: 'GPT-5.4', date: '2026-03', score: 93.3 },
+          { name: 'GPT-5.5', date: '2026-04', score: 94.0 },
+          { name: 'GPT-5.6 Sol', date: '2026-07', score: 95.2 },
+          { name: 'GPT-6 Astra', date: '2026-09', score: 96.0, isMajor: true },
+          { name: 'GPT-6 Sol', date: '2026-09', score: 95.8 },
+          { name: 'GPT-6.1 Sol', date: '2026-09', score: 95.4 }
+        ],
+        Anthropic: [
+          { name: 'Claude 1', date: '2023-03', score: 25.0, isMajor: true },
+          { name: 'Claude 2.0', date: '2023-07', score: 30.5, isMajor: true },
+          { name: 'Claude 2.1', date: '2023-11', score: 32.0 },
+          { name: 'Claude 3 Opus', date: '2024-03', score: 50.4, isMajor: true },
+          { name: 'Claude 3.5 Sonnet', date: '2024-06', score: 59.4 },
+          { name: 'Claude 3.5 Haiku', date: '2024-10', score: 65.0 },
+          { name: 'Claude 3.7 Sonnet', date: '2025-02', score: 78.0 },
+          { name: 'Claude 4.0', date: '2025-05', score: 82.0, isMajor: true },
+          { name: 'Claude 4.1', date: '2025-08', score: 84.0 },
+          { name: 'Claude 4.5 Sonnet', date: '2025-09', score: 86.0 },
+          { name: 'Claude 4.5 Opus', date: '2025-11', score: 89.0 },
+          { name: 'Claude 4.6 Sonnet', date: '2026-02', score: 90.5 },
+          { name: 'Claude 4.7', date: '2026-04', score: 94.2 },
+          { name: 'Claude 4.8 Opus', date: '2026-05', score: 93.6 },
+          { name: 'Claude Sonnet 5', date: '2026-06', score: 91.1 },
+          { name: 'Claude Fable 5', date: '2026-06', score: 95.5, isMajor: true },
+          { name: 'Claude Opus 5', date: '2026-07', score: 94.8 },
+          { name: 'Claude Fable 5.1', date: '2026-09', score: 95.8 },
+          { name: 'Claude Opus 5.5', date: '2026-09', score: 96.1, isMajor: true },
+          { name: 'Claude Sonnet 5.5', date: '2026-09', score: 95.2 },
+          { name: 'Claude Haiku 5.5', date: '2026-10', score: 92.4 }
+        ],
+        Google: [
+          { name: 'Gemini 1.0 Ultra', date: '2023-12', score: 31.1, isMajor: true },
+          { name: 'Gemini 1.5 Pro', date: '2024-02', score: 46.0 },
+          { name: 'Gemini 1.5 Pro (Aug)', date: '2024-08', score: 61.0 },
+          { name: 'Gemini 2.0', date: '2024-12', score: 75.0, isMajor: true },
+          { name: 'Gemini 2.5', date: '2025-03', score: 81.0 },
+          { name: 'Gemini 3.0', date: '2025-11', score: 91.9, isMajor: true },
+          { name: 'Gemini 3.1', date: '2026-02', score: 94.1 },
+          { name: 'Gemini 3.5 Flash', date: '2026-05', score: 92.2 },
+          { name: 'Gemini 3.6 Flash', date: '2026-07', score: 93.8 },
+          { name: 'Gemini 3.7 Flash', date: '2026-08', score: 94.3 },
+          { name: 'Gemini 3.8 Flash', date: '2026-09', score: 94.9 },
+          { name: 'Gemini 4 Argon', date: '2026-10', score: 96.4, isMajor: true }
+        ]
+      };
+
+      const scienceBenchmarks = {
+        gpqa: {
+          id: 'gpqa',
+          title: 'GPQA Diamond',
+          subtitle: 'Graduate-Level Scientific Reasoning',
+          organization: 'NYU, Anthropic & Independent PhDs',
+          focusArea: 'Biology, Physics, and Chemistry Graduate Proofs',
+          humanBaseline: 'PhD Experts: 65-70% | Non-Experts: ~34%',
+          status: 'Saturated (>96% Ceiling)',
+          summary: '198 rigorously vetted, multiple-choice questions designed to be Google-proof. While pioneering for tracking chain-of-thought progression in 2024–2025, modern apex reasoning engines have reached near-complete saturation.',
+          flagshipScores: {
+            Google: { score: 96.4, model: 'Gemini 4 Argon' },
+            Anthropic: { score: 96.1, model: 'Claude Opus 5.5' },
+            OpenAI: { score: 96.0, model: 'GPT-6 Astra' }
+          },
+          efficiencyScores: {
+            Google: { score: 94.9, model: 'Gemini 3.8 Flash' },
+            Anthropic: { score: 95.2, model: 'Claude Sonnet 5.5' },
+            OpenAI: { score: 95.4, model: 'GPT-6.1 Sol' }
+          }
+        },
+        hle: {
+          id: 'hle',
+          title: "Humanity's Last Exam (HLE)",
+          subtitle: 'Multidisciplinary PhD Closed-Response Frontier',
+          organization: 'Center for AI Safety (CAIS) & Scale AI',
+          focusArea: 'Quantum Physics, Organic Synthesis, Pure Math & Advanced Humanities',
+          humanBaseline: 'Domain Specialists: ~35-40% | Non-Experts: <4%',
+          status: 'Current Gold Standard (Primary SOTA)',
+          summary: 'Featuring ~2,500 questions co-designed with 3,000+ global academic researchers. Over 75% require exact-match numerical or short-phrase closed answers rather than multiple choice, eliminating guessing heuristics.',
+          flagshipScores: {
+            Anthropic: { score: 61.4, model: 'Claude Opus 5.5' },
+            Google: { score: 57.1, model: 'Gemini 4 Argon' },
+            OpenAI: { score: 54.7, model: 'GPT-6 Astra' }
+          },
+          efficiencyScores: {
+            Anthropic: { score: 56.9, model: 'Claude Sonnet 5.5' },
+            OpenAI: { score: 52.9, model: 'GPT-6.1 Sol' },
+            Google: { score: 53.1, model: 'Gemini 3.8 Flash' }
+          }
+        },
+        frontierMath: {
+          id: 'frontierMath',
+          title: 'FrontierMath',
+          subtitle: 'Original Research-Grade Mathematics',
+          organization: 'Epoch AI (in collaboration with Fields Medalists)',
+          focusArea: 'Algebraic Geometry, Number Theory, Topology & Combinatorics',
+          humanBaseline: 'Elite Mathematicians: Days of Research Work',
+          status: 'Highest Ceiling Frontier (<30% AI Ceiling)',
+          summary: 'Hundreds of unpublished, extraordinarily difficult mathematical problems developed with leading mathematicians. Requires deep multi-hour deductions, formal proof formulation, and tool augmentation.',
+          flagshipScores: {
+            OpenAI: { score: 28.4, model: 'GPT-6 Astra' },
+            Google: { score: 26.9, model: 'Gemini 4 Argon' },
+            Anthropic: { score: 25.1, model: 'Claude Opus 5.5' }
+          },
+          efficiencyScores: {
+            OpenAI: { score: 20.4, model: 'GPT-6.1 Sol' },
+            Google: { score: 17.5, model: 'Gemini 3.8 Flash' },
+            Anthropic: { score: 18.9, model: 'Claude Sonnet 5.5' }
+          }
+        },
+        labBench: {
+          id: 'labBench',
+          title: 'Lab-Bench & BioProtocols',
+          subtitle: 'Wet-Lab Simulation & Experimental Deduction',
+          organization: 'FutureHouse & Academic Consortium',
+          focusArea: 'Experimental Protocols, Gene Sequencing, Synthesis Planning',
+          humanBaseline: 'Senior Wet-Lab Postdocs: ~72%',
+          status: 'Active Wet-Lab Agentic Standard',
+          summary: 'Evaluates real-world capability in molecular biology, protein design, and chemical reaction synthesis. Tests whether models can formulate actionable experimental steps and spot contaminated protocols.',
+          flagshipScores: {
+            Google: { score: 88.6, model: 'Gemini 4 Argon' },
+            Anthropic: { score: 87.2, model: 'Claude Opus 5.5' },
+            OpenAI: { score: 85.9, model: 'GPT-6 Astra' }
+          },
+          efficiencyScores: {
+            Google: { score: 82.4, model: 'Gemini 3.8 Flash' },
+            Anthropic: { score: 82.1, model: 'Claude Sonnet 5.5' },
+            OpenAI: { score: 81.6, model: 'GPT-6.1 Sol' }
+          }
+        }
+      };
+
+      const flagshipPricing = {
+        OpenAI: {
+          model: 'GPT-6 Astra',
+          badge: 'Apex Reasoner',
+          color: '#10a37f',
+          inputPerM: 10.00,
+          cachedInputPerM: 2.50,
+          outputPerM: 50.00,
+          contextWindow: '1.05M Tokens'
+        },
+        Anthropic: {
+          model: 'Claude Opus 5.5',
+          badge: 'Agentic Heavyweight',
+          color: '#d97757',
+          inputPerM: 4.00,
+          cachedInputPerM: 0.20,
+          outputPerM: 20.00,
+          contextWindow: '1M Tokens'
+        },
+        Google: {
+          model: 'Gemini 4 Argon',
+          badge: 'Multimodal Titan',
+          color: '#4285F4',
+          inputPerM: 2.00,
+          cachedInputPerM: 0.10,
+          outputPerM: 10.00,
+          contextWindow: '4M Tokens'
+        }
+      };
+
+      const scenarios = {
+        agent: {
+          title: 'Autonomous Coding Agent',
+          desc: '120k input tokens (80% cached), 6k output tokens',
+          input: 120000,
+          cachedRatio: 0.8,
+          output: 6000
+        },
+        synthesis: {
+          title: '250k Doc Synthesis',
+          desc: '250k input tokens (50% cached), 4k output tokens',
+          input: 250000,
+          cachedRatio: 0.5,
+          output: 4000
+        },
+        quick: {
+          title: 'Ad-hoc Complex Query',
+          desc: '25k input tokens (uncached), 2k output tokens',
+          input: 25000,
+          cachedRatio: 0.0,
+          output: 2000
+        }
+      };
+
+      const costScoreModels = [
+        {
+          name: 'Gemini 4 Argon',
+          company: 'Google',
+          tier: 'Apex Frontier',
+          inputCost: 2.00,
+          outputCost: 10.00,
+          blendedCost: (2.00 * 0.75) + (10.00 * 0.25),
+          scores: { hle: 57.1, gpqa: 96.4, frontierMath: 26.9 },
+          context: '4M Tokens'
+        },
+        {
+          name: 'Gemini 3.8 Flash',
+          company: 'Google',
+          tier: 'Leading Lightweight',
+          inputCost: 0.75,
+          outputCost: 3.75,
+          blendedCost: (0.75 * 0.75) + (3.75 * 0.25),
+          scores: { hle: 53.1, gpqa: 94.9, frontierMath: 17.5 },
+          context: '2M Tokens'
+        },
+        {
+          name: 'Claude Opus 5.5',
+          company: 'Anthropic',
+          tier: 'Apex Frontier',
+          inputCost: 4.00,
+          outputCost: 20.00,
+          blendedCost: (4.00 * 0.75) + (20.00 * 0.25),
+          scores: { hle: 61.4, gpqa: 96.1, frontierMath: 25.1 },
+          context: '1M Tokens'
+        },
+        {
+          name: 'Claude Sonnet 5.5',
+          company: 'Anthropic',
+          tier: 'Leading Workhorse',
+          inputCost: 2.00,
+          outputCost: 10.00,
+          blendedCost: (2.00 * 0.75) + (10.00 * 0.25),
+          scores: { hle: 56.9, gpqa: 95.2, frontierMath: 18.9 },
+          context: '1M Tokens'
+        },
+        {
+          name: 'Claude Haiku 5.5',
+          company: 'Anthropic',
+          tier: 'Ultra-Efficiency',
+          inputCost: 0.10,
+          outputCost: 0.50,
+          blendedCost: (0.10 * 0.75) + (0.50 * 0.25),
+          scores: { hle: 45.9, gpqa: 92.4, frontierMath: 14.2 },
+          context: '1M Tokens'
+        },
+        {
+          name: 'GPT-6 Astra',
+          company: 'OpenAI',
+          tier: 'Apex Frontier',
+          inputCost: 10.00,
+          outputCost: 50.00,
+          blendedCost: (10.00 * 0.75) + (50.00 * 0.25),
+          scores: { hle: 54.7, gpqa: 96.0, frontierMath: 28.4 },
+          context: '1.05M Tokens'
+        },
+        {
+          name: 'GPT-6.1 Sol',
+          company: 'OpenAI',
+          tier: 'Leading Workhorse',
+          inputCost: 2.00,
+          outputCost: 10.00,
+          blendedCost: (2.00 * 0.75) + (10.00 * 0.25),
+          scores: { hle: 52.9, gpqa: 95.4, frontierMath: 20.4 },
+          context: '1.05M Tokens'
+        }
+      ];
+
+      const colors = {
+        OpenAI: '#10a37f',
+        Anthropic: '#d97757',
+        Google: '#4285F4'
+      };
+
+      const width = 1200;
+      const height = 580;
+      const padding = { top: 45, bottom: 85, left: 110, right: 80 };
+      const graphWidth = width - padding.left - padding.right;
+
+      const minDate = timelineSpan === 'all' ? new Date(2023, 0, 1) : new Date(2025, 9, 1);
+      const maxDate = new Date(2026, 11, 1);
+
+      const totalMonths = (maxDate.getFullYear() - minDate.getFullYear()) * 12 + (maxDate.getMonth() - minDate.getMonth());
+
+      const parseDate = (dateStr) => {
+        const [year, month] = dateStr.split('-').map(Number);
+        return new Date(year, month - 1, 1);
+      };
+
+      const getX = (dateStr) => {
+        const d = parseDate(dateStr);
+        const monthsFromMin = (d.getFullYear() - minDate.getFullYear()) * 12 + (d.getMonth() - minDate.getMonth());
+        return padding.left + (monthsFromMin / totalMonths) * graphWidth;
+      };
+
+      const formatMonthYear = (dateStr) => {
+        const [year, month] = dateStr.split('-').map(Number);
+        const d = new Date(year, month - 1, 1);
+        return d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+      };
+
+      const companyY = {
+        OpenAI: padding.top + 55,
+        Anthropic: padding.top + 195,
+        Google: padding.top + 335
+      };
+
+      const monthLines = [];
+      let currentYear = minDate.getFullYear();
+      let currentMonth = minDate.getMonth() + 1;
+
+      while (currentYear < maxDate.getFullYear() || (currentYear === maxDate.getFullYear() && currentMonth <= maxDate.getMonth() + 1)) {
+        const dateStr = `${currentYear}-${String(currentMonth).padStart(2, '0')}`;
+        const d = new Date(currentYear, currentMonth - 1, 1);
+        monthLines.push({
+          dateStr,
+          x: getX(dateStr),
+          monthStr: d.toLocaleDateString('en-US', { month: 'short' }),
+          yearStr: d.toLocaleDateString('en-US', { year: '2-digit' }),
+          isYearStart: currentMonth === 1
+        });
+
+        currentMonth++;
+        if (currentMonth > 12) {
+          currentMonth = 1;
+          currentYear++;
+        }
+      }
+
+      const filteredData = Object.keys(data).reduce((acc, company) => {
+        acc[company] = data[company].filter((m) => parseDate(m.date) >= minDate && parseDate(m.date) <= maxDate);
+        return acc;
+      }, {});
+
+      const renderPath = (companyData, companyName, color) => {
+        if (!companyData || companyData.length === 0) return null;
+        const y = companyY[companyName];
+        const points = companyData.map((d) => {
+          const sameMonthItems = companyData.filter(m => m.date === d.date);
+          const itemIndexInMonth = sameMonthItems.findIndex(m => m.name === d.name);
+          const xOffset = sameMonthItems.length > 1 ? (itemIndexInMonth - (sameMonthItems.length - 1) / 2) * 22 : 0;
+          return `${getX(d.date) + xOffset},${y}`;
+        }).join(' L ');
+
+        return <path d={`M ${points}`} fill="none" stroke={color} strokeWidth="3" opacity="0.8" className="transition-all duration-500" />;
+      };
+
+      const cutoff365 = new Date(2025, 9, 1);
+      const cutoff180 = new Date(2026, 3, 1);
+
+      const recentReleases365 = Object.entries(data).flatMap(([company, models]) =>
+        models.filter(m => parseDate(m.date) >= cutoff365).map(m => ({ ...m, company }))
+      );
+
+      const totalRecentReleases = recentReleases365.length;
+      const avgDaysBetween = totalRecentReleases > 0 ? Math.round(365 / totalRecentReleases) : 0;
+
+      const companyStats = Object.keys(data).reduce((acc, company) => {
+        const models365 = data[company].filter(m => parseDate(m.date) >= cutoff365);
+        const models180 = data[company].filter(m => parseDate(m.date) >= cutoff180);
+
+        acc[company] = {
+          pacing365: models365.length > 0 ? (12 / models365.length).toFixed(1) : 'N/A',
+          count365: models365.length,
+          pacing180: models180.length > 0 ? (6 / models180.length).toFixed(1) : 'N/A',
+          count180: models180.length
+        };
+        return acc;
+      }, {});
+
+      const calculateScenarioCost = (company, scenarioKey) => {
+        const sc = scenarios[scenarioKey];
+        const rates = flagshipPricing[company];
+        const uncachedTokens = sc.input * (1 - sc.cachedRatio);
+        const cachedTokens = sc.input * sc.cachedRatio;
+
+        const inputCost = (uncachedTokens / 1000000) * rates.inputPerM;
+        const cachedCost = (cachedTokens / 1000000) * rates.cachedInputPerM;
+        const outputCost = (sc.output / 1000000) * rates.outputPerM;
+
+        return (inputCost + cachedCost + outputCost).toFixed(4);
+      };
+
+      const sWidth = 960;
+      const sHeight = 520;
+      const sPadding = { top: 40, right: 60, bottom: 65, left: 80 };
+      const sInnerWidth = sWidth - sPadding.left - sPadding.right;
+      const sInnerHeight = sHeight - sPadding.top - sPadding.bottom;
+
+      const getModelCost = (m) => {
+        if (costMetric === 'input') return m.inputCost;
+        if (costMetric === 'output') return m.outputCost;
+        return m.blendedCost;
+      };
+
+      // Dynamic logarithmic domain calculation adapting automatically to input, output, or blended metric
+      const costDomains = {
+        input: { min: 0.07, max: 15.0, ticks: [0.10, 0.25, 0.75, 2.00, 4.00, 10.00] },
+        output: { min: 0.35, max: 65.0, ticks: [0.50, 1.00, 3.75, 10.00, 20.00, 50.00] },
+        blended: { min: 0.15, max: 28.0, ticks: [0.20, 0.50, 1.50, 4.00, 10.00, 20.00] }
+      };
+
+      const activeDomain = costDomains[costMetric];
+      const logMin = Math.log10(activeDomain.min);
+      const logMax = Math.log10(activeDomain.max);
+
+      const getScatterX = (cost) => {
+        const clampedCost = Math.max(activeDomain.min, Math.min(activeDomain.max, cost));
+        const logCost = Math.log10(clampedCost);
+        return sPadding.left + ((logCost - logMin) / (logMax - logMin)) * sInnerWidth;
+      };
+
+      const benchmarkYConfig = {
+        hle: { min: 40, max: 70, label: "Humanity's Last Exam (HLE Score %)", ticks: [40, 45, 50, 55, 60, 65, 70] },
+        gpqa: { min: 90, max: 98, label: 'GPQA Diamond Score (%)', ticks: [90, 91, 92, 93, 94, 95, 96, 97, 98] },
+        frontierMath: { min: 12, max: 30, label: 'FrontierMath Score (%)', ticks: [12, 15, 18, 21, 24, 27, 30] }
+      };
+
+      const currentYConfig = benchmarkYConfig[scatterBenchmark];
+      const getScatterY = (score) => {
+        const clampedScore = Math.max(currentYConfig.min, Math.min(currentYConfig.max, score));
+        const ratio = (clampedScore - currentYConfig.min) / (currentYConfig.max - currentYConfig.min);
+        return sHeight - sPadding.bottom - ratio * sInnerHeight;
+      };
+
+      return (
+        <div className="w-full max-w-6xl mx-auto p-4 md:p-6 bg-slate-50 min-h-screen rounded-2xl shadow-xl font-sans text-slate-800">
+          
+          <header className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200/80 pb-5">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="p-2 bg-indigo-600 text-white rounded-xl shadow-sm">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                </span>
+                <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">AI Frontier Intelligence Hub</h1>
+              </div>
+              <p className="text-slate-500 text-sm mt-1">
+                Tracking model releases, scientific benchmarks (GPQA, HLE, FrontierMath), and cost-to-performance frontiers.
+              </p>
+            </div>
+
+            <div className="flex bg-slate-200/70 p-1.5 rounded-xl text-xs md:text-sm font-semibold self-start md:self-auto shadow-inner flex-wrap gap-1">
+              <button
+                onClick={() => setActiveTab('timeline')}
+                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg transition-all ${
+                  activeTab === 'timeline' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <span>Timeline & Velocity</span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('benchmarks')}
+                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg transition-all ${
+                  activeTab === 'benchmarks' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                </svg>
+                <span>Science Benchmarks</span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('costVsScore')}
+                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg transition-all ${
+                  activeTab === 'costVsScore' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                <span>Cost vs. Score</span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('pricing')}
+                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg transition-all ${
+                  activeTab === 'pricing' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>Token Economics</span>
+              </button>
+            </div>
+          </header>
+
+          {}
+          {activeTab === 'timeline' && (
+            <div>
+              <div className="flex items-center justify-between mb-3 bg-white px-4 py-2.5 rounded-xl border border-slate-200">
+                <div className="flex items-center gap-2 text-xs text-slate-600 font-medium">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                  <span>Viewing Timeline Span:</span>
+                  <strong className="text-slate-800">{timelineSpan === '12m' ? 'Last 12 Months (High Resolution)' : 'All Time (Jan 2023 - Late 2026)'}</strong>
+                </div>
+
+                <div className="flex items-center bg-slate-100 p-1 rounded-lg text-xs font-semibold">
+                  <button
+                    onClick={() => setTimelineSpan('all')}
+                    className={`px-3 py-1 rounded-md transition-all ${
+                      timelineSpan === 'all' ? 'bg-white text-indigo-600 shadow-sm font-bold' : 'text-slate-500 hover:text-slate-900'
+                    }`}
+                  >
+                    All Time (2023–2026)
+                  </button>
+                  <button
+                    onClick={() => setTimelineSpan('12m')}
+                    className={`px-3 py-1 rounded-md transition-all ${
+                      timelineSpan === '12m' ? 'bg-white text-indigo-600 shadow-sm font-bold' : 'text-slate-500 hover:text-slate-900'
+                    }`}
+                  >
+                    Last 12 Months (Spaced)
+                  </button>
+                </div>
+              </div>
+
+              <div className="relative w-full overflow-x-auto bg-white rounded-xl border border-slate-200 shadow-sm mb-6">
+                <div className="min-w-[950px]">
+                  <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto">
+                    <line
+                      x1={padding.left - 20}
+                      y1={height - padding.bottom}
+                      x2={width - padding.right + 20}
+                      y2={height - padding.bottom}
+                      stroke="#cbd5e1"
+                      strokeWidth="2"
+                    />
+
+                    {monthLines.map((line) => (
+                      <g key={`month-${line.dateStr}`}>
+                        <line
+                          x1={line.x}
+                          y1={line.isYearStart ? padding.top : height - padding.bottom}
+                          x2={line.x}
+                          y2={height - padding.bottom + (line.isYearStart ? 8 : 4)}
+                          stroke={line.isYearStart ? '#94a3b8' : '#cbd5e1'}
+                          strokeWidth={line.isYearStart ? '2' : '1'}
+                          strokeDasharray={line.isYearStart ? '4 4' : 'none'}
+                          opacity={line.isYearStart ? '0.5' : '1'}
+                        />
+                        <text
+                          x={line.x - 4}
+                          y={height - padding.bottom + 18}
+                          textAnchor="end"
+                          transform={`rotate(-45, ${line.x - 4}, ${height - padding.bottom + 18})`}
+                          className={`text-[11px] ${line.isYearStart ? 'fill-slate-800 font-bold' : 'fill-slate-500'}`}
+                        >
+                          {line.monthStr} {line.isYearStart || timelineSpan === '12m' ? `'${line.yearStr}` : ''}
+                        </text>
+                      </g>
+                    ))}
+
+                    {Object.keys(companyY).map((company) => (
+                      <text
+                        key={`label-${company}`}
+                        x={padding.left - 20}
+                        y={companyY[company] + 5}
+                        textAnchor="end"
+                        fill={colors[company]}
+                        className="text-base font-bold"
+                      >
+                        {company}
+                      </text>
+                    ))}
+
+                    {Object.keys(filteredData).map((company) => (
+                      <g key={`line-${company}`}>{renderPath(filteredData[company], company, colors[company])}</g>
+                    ))}
+
+                    {Object.keys(filteredData).map((company) =>
+                      filteredData[company].map((point, i) => {
+                        const isHovered = hoveredPoint?.name === point.name && hoveredPoint?.company === company;
+                        const baseRadius = point.isMajor ? 10 : 6;
+                        const hoverRadius = point.isMajor ? 14 : 10;
+
+                        const sameMonthItems = filteredData[company].filter((m) => m.date === point.date);
+                        const itemIndexInMonth = sameMonthItems.findIndex((m) => m.name === point.name);
+                        const xOffset = sameMonthItems.length > 1 ? (itemIndexInMonth - (sameMonthItems.length - 1) / 2) * (timelineSpan === '12m' ? 24 : 16) : 0;
+                        const pointX = getX(point.date) + xOffset;
+                        const pointY = companyY[company];
+
+                        const isAlternatedUp = sameMonthItems.length > 1
+                          ? itemIndexInMonth % 2 === 1
+                          : i % 2 === 1;
+
+                        const staggerTier = timelineSpan === '12m' 
+                          ? (i % 2 === 0 ? 16 : 28)
+                          : (i % 4 >= 2 ? 30 : 16);
+
+                        const labelX = pointX + (point.isMajor ? 12 : 9);
+                        const labelY = isAlternatedUp
+                          ? pointY - (point.isMajor ? staggerTier + 6 : staggerTier)
+                          : pointY + (point.isMajor ? staggerTier + 8 : staggerTier + 2);
+
+                        const rotationAngle = isAlternatedUp ? -35 : 35;
+
+                        return (
+                          <g key={`point-${company}-${point.name}-${i}`}>
+                            <circle
+                              cx={pointX}
+                              cy={pointY}
+                              r={isHovered ? hoverRadius : baseRadius}
+                              fill={colors[company]}
+                              stroke="#ffffff"
+                              strokeWidth="2.5"
+                              className="cursor-pointer transition-all duration-200"
+                              onMouseEnter={() => setHoveredPoint({ ...point, company, x: pointX, y: pointY })}
+                              onMouseLeave={() => setHoveredPoint(null)}
+                            />
+                            <text
+                              x={labelX}
+                              y={labelY}
+                              fill={colors[company]}
+                              fontSize={timelineSpan === '12m' ? '11' : '10'}
+                              textAnchor="start"
+                              stroke="#ffffff"
+                              strokeWidth="3.5"
+                              strokeLinejoin="round"
+                              paintOrder="stroke fill"
+                              transform={`rotate(${rotationAngle}, ${labelX}, ${labelY})`}
+                              className={`pointer-events-none select-none ${point.isMajor ? 'font-extrabold' : 'font-semibold'}`}
+                            >
+                              {point.name}
+                            </text>
+                          </g>
+                        );
+                      })
+                    )}
+                  </svg>
+
+                  {hoveredPoint && (
+                    <div
+                      className="absolute z-10 bg-slate-900 text-white text-xs px-3.5 py-2 rounded-lg shadow-lg pointer-events-none transform -translate-x-1/2 -translate-y-full mt-[-10px]"
+                      style={{ left: `${(hoveredPoint.x / width) * 100}%`, top: `${(hoveredPoint.y / height) * 100}%` }}
+                    >
+                      <div className="font-bold text-sm" style={{ color: colors[hoveredPoint.company] }}>
+                        {hoveredPoint.name}
+                      </div>
+                      <div className="text-slate-300">{formatMonthYear(hoveredPoint.date)}</div>
+                      <div className="text-slate-300 font-mono mt-0.5">GPQA Diamond: {hoveredPoint.score}%</div>
+                      <div className="absolute w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-slate-900 left-1/2 bottom-[-6px] transform -translate-x-1/2" />
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                  <div>
+                    <h2 className="text-lg font-bold text-slate-900 mb-1">Industry Release Velocity</h2>
+                    <p className="text-sm text-slate-500 mb-4">Past 365 Days Rolling Window (Oct 2025 - Oct 2026)</p>
+
+                    <div className="flex items-baseline space-x-2 mb-3">
+                      <span className="text-4xl font-extrabold text-indigo-600">{avgDaysBetween}</span>
+                      <span className="text-lg font-semibold text-slate-500">days between releases</span>
+                    </div>
+                    <p className="text-sm text-slate-600 leading-relaxed">
+                      Across OpenAI, Anthropic, and Google, a new frontier model or milestone revision was released roughly every{' '}
+                      <strong>{(avgDaysBetween / 30.4).toFixed(1)} months</strong> over the past rolling year.
+                    </p>
+                  </div>
+                  <div className="mt-4 text-xs text-slate-500 bg-slate-50 p-3 rounded-lg border border-slate-100">
+                    <strong>Total updates in window:</strong> {totalRecentReleases} models. Reflects generational jumps (GPT-6 Astra, Claude Opus 5.5, Gemini 4 Argon) and sub-generational efficiency models.
+                  </div>
+                </div>
+
+                <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                  <div className="flex justify-between items-start mb-1">
+                    <h2 className="text-lg font-bold text-slate-900">Company Release Pacing</h2>
+                    <span className="text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-600 px-2 py-0.5 rounded">
+                      Cadence
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 mb-4">Comparing release intervals over 365-day and 180-day windows</p>
+
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs">
+                      <thead>
+                        <tr className="border-b border-slate-100 text-slate-400 font-semibold uppercase">
+                          <th className="pb-2">Company</th>
+                          <th className="pb-2 text-center">Last 365 Days</th>
+                          <th className="pb-2 text-center">Last 180 Days</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {Object.keys(data).map((company) => (
+                          <tr key={`pacing-${company}`} className="hover:bg-slate-50/80 transition-colors">
+                            <td className="py-2.5 flex items-center gap-2 font-bold text-slate-800">
+                              <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: colors[company] }} />
+                              {company}
+                            </td>
+                            <td className="py-2.5 text-center text-slate-700">
+                              <span className="font-semibold">~{companyStats[company].pacing365} mo</span>
+                              <span className="text-[10px] text-slate-400 block font-normal">({companyStats[company].count365} drops)</span>
+                            </td>
+                            <td className="py-2.5 text-center text-slate-700">
+                              <span className="font-semibold text-indigo-600">~{companyStats[company].pacing180} mo</span>
+                              <span className="text-[10px] text-slate-400 block font-normal">({companyStats[company].count180} drops)</span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  <div className="mt-4 text-xs text-slate-400 bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                    Formula: (12 months ÷ releases in 365d) and (6 months ÷ releases in 180d).
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {}
+          {activeTab === 'benchmarks' && (
+            <div className="space-y-6">
+              <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white p-6 rounded-2xl shadow-lg border border-slate-800">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div>
+                    <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-indigo-500/20 border border-indigo-400/30 text-indigo-300 text-xs font-semibold uppercase tracking-wider mb-2">
+                      <span className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse" />
+                      Frontier Paradigm Shift
+                    </div>
+                    <h2 className="text-2xl font-bold">The Post-GPQA Scientific Reasoning Landscape</h2>
+                    <p className="text-slate-300 text-sm mt-1 max-w-3xl leading-relaxed">
+                      With top reasoning models breaking past <strong>96% on GPQA Diamond</strong>, the benchmark has reached saturation. The global AI research community has adopted three new high-ceiling benchmarks: <strong>Humanity&apos;s Last Exam (HLE)</strong>, <strong>FrontierMath</strong>, and <strong>Lab-Bench</strong>.
+                    </p>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2 shrink-0">
+                    <button
+                      onClick={() => setSelectedBenchmark('all')}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                        selectedBenchmark === 'all' ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                      }`}
+                    >
+                      All 4 Benchmarks
+                    </button>
+                    {Object.values(scienceBenchmarks).map((bm) => (
+                      <button
+                        key={bm.id}
+                        onClick={() => setSelectedBenchmark(bm.id)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                          selectedBenchmark === bm.id ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                        }`}
+                      >
+                        {bm.title.split(' ')[0]}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm overflow-x-auto">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 className="text-lg font-bold text-slate-900">Apex Flagships vs. Efficiency Tier Matrix</h3>
+                    <p className="text-xs text-slate-500">Side-by-side performance across all four foundational science & reasoning suites.</p>
+                  </div>
+                  <span className="text-[11px] font-semibold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-md">
+                    Updated October 2026
+                  </span>
+                </div>
+
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead>
+                    <tr className="border-b border-slate-200 text-slate-400 font-semibold uppercase text-[10px] tracking-wider">
+                      <th className="py-2.5 pr-4">Provider & Flagship</th>
+                      <th className="py-2.5 px-3 text-center">GPQA Diamond</th>
+                      <th className="py-2.5 px-3 text-center bg-indigo-50/50 text-indigo-950 font-bold">HLE (PhD Closed)</th>
+                      <th className="py-2.5 px-3 text-center">FrontierMath</th>
+                      <th className="py-2.5 px-3 text-center">Lab-Bench</th>
+                      <th className="py-2.5 pl-3 text-center">Speed / Efficiency Counterpart</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    <tr className="hover:bg-slate-50/70 transition-colors">
+                      <td className="py-3.5 pr-4">
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 rounded-full bg-[#4285F4]" />
+                          <div>
+                            <div className="font-extrabold text-slate-900 text-sm">Gemini 4 Argon</div>
+                            <div className="text-[10px] text-slate-400">Google DeepMind</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-3.5 px-3 text-center">
+                        <span className="font-black text-slate-800 text-sm">96.4%</span>
+                        <span className="block text-[9px] text-emerald-600 font-bold">1st Place</span>
+                      </td>
+                      <td className="py-3.5 px-3 text-center bg-indigo-50/40">
+                        <span className="font-black text-indigo-900 text-sm">57.1%</span>
+                        <span className="block text-[9px] text-slate-500 font-medium">PhD Baseline: 38%</span>
+                      </td>
+                      <td className="py-3.5 px-3 text-center">
+                        <span className="font-black text-slate-800 text-sm">26.9%</span>
+                        <span className="block text-[9px] text-slate-400">Fields-Tier</span>
+                      </td>
+                      <td className="py-3.5 px-3 text-center">
+                        <span className="font-black text-emerald-700 text-sm">88.6%</span>
+                        <span className="block text-[9px] text-emerald-600 font-bold">1st Place</span>
+                      </td>
+                      <td className="py-3.5 pl-3 text-center">
+                        <span className="font-bold text-slate-700">Gemini 3.8 Flash</span>
+                        <span className="block text-[10px] text-slate-400 font-mono">HLE: 53.1% | GPQA: 94.9%</span>
+                      </td>
+                    </tr>
+
+                    <tr className="hover:bg-slate-50/70 transition-colors">
+                      <td className="py-3.5 pr-4">
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 rounded-full bg-[#d97757]" />
+                          <div>
+                            <div className="font-extrabold text-slate-900 text-sm">Claude Opus 5.5</div>
+                            <div className="text-[10px] text-slate-400">Anthropic</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-3.5 px-3 text-center">
+                        <span className="font-black text-slate-800 text-sm">96.1%</span>
+                        <span className="block text-[9px] text-slate-400 font-medium">Near-ceiling</span>
+                      </td>
+                      <td className="py-3.5 px-3 text-center bg-indigo-50/40">
+                        <span className="font-black text-indigo-900 text-sm">61.4%</span>
+                        <span className="block text-[9px] text-emerald-600 font-bold">1st Place (Apex)</span>
+                      </td>
+                      <td className="py-3.5 px-3 text-center">
+                        <span className="font-black text-slate-800 text-sm">25.1%</span>
+                        <span className="block text-[9px] text-slate-400">Fields-Tier</span>
+                      </td>
+                      <td className="py-3.5 px-3 text-center">
+                        <span className="font-black text-slate-800 text-sm">87.2%</span>
+                        <span className="block text-[9px] text-slate-400">Wet-Lab Agentic</span>
+                      </td>
+                      <td className="py-3.5 pl-3 text-center">
+                        <span className="font-bold text-slate-700">Claude Sonnet 5.5</span>
+                        <span className="block text-[10px] text-slate-400 font-mono">HLE: 56.9% | GPQA: 95.2%</span>
+                      </td>
+                    </tr>
+
+                    <tr className="hover:bg-slate-50/70 transition-colors">
+                      <td className="py-3.5 pr-4">
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 rounded-full bg-[#10a37f]" />
+                          <div>
+                            <div className="font-extrabold text-slate-900 text-sm">GPT-6 Astra</div>
+                            <div className="text-[10px] text-slate-400">OpenAI</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-3.5 px-3 text-center">
+                        <span className="font-black text-slate-800 text-sm">96.0%</span>
+                        <span className="block text-[9px] text-slate-400 font-medium">Near-ceiling</span>
+                      </td>
+                      <td className="py-3.5 px-3 text-center bg-indigo-50/40">
+                        <span className="font-black text-indigo-900 text-sm">54.7%</span>
+                        <span className="block text-[9px] text-slate-500 font-medium">PhD Baseline: 38%</span>
+                      </td>
+                      <td className="py-3.5 px-3 text-center">
+                        <span className="font-black text-emerald-700 text-sm">28.4%</span>
+                        <span className="block text-[9px] text-emerald-600 font-bold">1st Place (Apex)</span>
+                      </td>
+                      <td className="py-3.5 px-3 text-center">
+                        <span className="font-black text-slate-800 text-sm">85.9%</span>
+                        <span className="block text-[9px] text-slate-400">Wet-Lab Agentic</span>
+                      </td>
+                      <td className="py-3.5 pl-3 text-center">
+                        <span className="font-bold text-slate-700">GPT-6.1 Sol</span>
+                        <span className="block text-[10px] text-slate-400 font-mono">HLE: 52.9% | GPQA: 95.4%</span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              {}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {Object.values(scienceBenchmarks)
+                  .filter(bm => selectedBenchmark === 'all' || selectedBenchmark === bm.id)
+                  .map((bm) => (
+                    <div
+                      key={bm.id}
+                      className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between"
+                    >
+                      <div>
+                        <div className="flex justify-between items-start mb-2">
+                          <div>
+                            <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-wider block">
+                              {bm.organization}
+                            </span>
+                            <h4 className="text-xl font-extrabold text-slate-900">{bm.title}</h4>
+                          </div>
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+                            {bm.status}
+                          </span>
+                        </div>
+
+                        <p className="text-xs text-slate-500 font-medium mb-3">{bm.subtitle}</p>
+
+                        <div className="space-y-1.5 mb-4 text-xs bg-slate-50 p-3 rounded-lg border border-slate-150">
+                          <div>
+                            <span className="text-slate-400 font-semibold uppercase text-[10px]">Domain:</span>{' '}
+                            <span className="text-slate-700 font-medium">{bm.focusArea}</span>
+                          </div>
+                          <div>
+                            <span className="text-slate-400 font-semibold uppercase text-[10px]">Human Baseline:</span>{' '}
+                            <span className="text-slate-700 font-bold">{bm.humanBaseline}</span>
+                          </div>
+                        </div>
+
+                        <p className="text-xs text-slate-600 leading-relaxed mb-5">{bm.summary}</p>
+                      </div>
+
+                      <div className="border-t border-slate-100 pt-4">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-2">
+                          Flagship Performance:
+                        </span>
+                        <div className="space-y-2.5">
+                          {Object.entries(bm.flagshipScores).map(([company, res]) => (
+                            <div key={`${bm.id}-${company}`} className="space-y-1">
+                              <div className="flex justify-between items-center text-xs">
+                                <span className="font-semibold text-slate-700 flex items-center gap-1.5">
+                                  <span className="w-2 h-2 rounded-full" style={{ backgroundColor: colors[company] }} />
+                                  {company} ({res.model})
+                                </span>
+                                <span className="font-mono font-extrabold text-slate-900">{res.score.toFixed(1)}%</span>
+                              </div>
+                              <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                                <div
+                                  className="h-2 rounded-full transition-all duration-700"
+                                  style={{ width: `${res.score}%`, backgroundColor: colors[company] }}
+                                />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          )}
+
+          {}
+          {activeTab === 'costVsScore' && (
+            <div className="space-y-6">
+              <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="p-1.5 bg-emerald-50 text-emerald-600 rounded-lg">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                      </svg>
+                    </span>
+                    <h2 className="text-xl font-extrabold text-slate-900">Frontier Flagships vs. Leading Lightweight Models</h2>
+                  </div>
+                  <p className="text-xs text-slate-500 mt-1">
+                    Comparing API token cost (log scale) against scientific reasoning scores.
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-3">
+                  <div className="flex items-center bg-slate-100 p-1 rounded-lg text-xs font-semibold">
+                    <button
+                      onClick={() => setCostMetric('input')}
+                      className={`px-2.5 py-1 rounded-md transition-all ${
+                        costMetric === 'input' ? 'bg-white text-emerald-700 shadow-sm font-bold' : 'text-slate-600 hover:text-slate-900'
+                      }`}
+                    >
+                      Input $/1M
+                    </button>
+                    <button
+                      onClick={() => setCostMetric('output')}
+                      className={`px-2.5 py-1 rounded-md transition-all ${
+                        costMetric === 'output' ? 'bg-white text-emerald-700 shadow-sm font-bold' : 'text-slate-600 hover:text-slate-900'
+                      }`}
+                    >
+                      Output $/1M
+                    </button>
+                    <button
+                      onClick={() => setCostMetric('blended')}
+                      className={`px-2.5 py-1 rounded-md transition-all ${
+                        costMetric === 'blended' ? 'bg-white text-emerald-700 shadow-sm font-bold' : 'text-slate-600 hover:text-slate-900'
+                      }`}
+                    >
+                      Blended (3:1)
+                    </button>
+                  </div>
+
+                  <div className="flex items-center bg-indigo-50 border border-indigo-150 p-1 rounded-lg text-xs font-semibold">
+                    <button
+                      onClick={() => setScatterBenchmark('hle')}
+                      className={`px-2.5 py-1 rounded-md transition-all ${
+                        scatterBenchmark === 'hle' ? 'bg-indigo-600 text-white shadow-sm font-bold' : 'text-indigo-900 hover:text-indigo-700'
+                      }`}
+                    >
+                      Humanity&apos;s Last Exam (HLE)
+                    </button>
+                    <button
+                      onClick={() => setScatterBenchmark('gpqa')}
+                      className={`px-2.5 py-1 rounded-md transition-all ${
+                        scatterBenchmark === 'gpqa' ? 'bg-indigo-600 text-white shadow-sm font-bold' : 'text-indigo-900 hover:text-indigo-700'
+                      }`}
+                    >
+                      GPQA Diamond
+                    </button>
+                    <button
+                      onClick={() => setScatterBenchmark('frontierMath')}
+                      className={`px-2.5 py-1 rounded-md transition-all ${
+                        scatterBenchmark === 'frontierMath' ? 'bg-indigo-600 text-white shadow-sm font-bold' : 'text-indigo-900 hover:text-indigo-700'
+                      }`}
+                    >
+                      FrontierMath
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="relative w-full overflow-x-auto bg-white rounded-xl border border-slate-200 shadow-sm p-2 md:p-5">
+                <div className="min-w-[780px]">
+                  <svg viewBox={`0 0 ${sWidth} ${sHeight}`} className="w-full h-auto">
+                    <rect
+                      x={sPadding.left}
+                      y={sPadding.top}
+                      width={sInnerWidth * 0.45}
+                      height={sInnerHeight * 0.55}
+                      fill="#f0fdf4"
+                      opacity="0.65"
+                      rx="8"
+                    />
+                    <text
+                      x={sPadding.left + 14}
+                      y={sPadding.top + 22}
+                      fill="#15803d"
+                      fontSize="11"
+                      fontWeight="bold"
+                      className="select-none tracking-wider uppercase opacity-85"
+                    >
+                      High Efficiency Sweet Spot (Top ROI)
+                    </text>
+
+                    {currentYConfig.ticks.map((tickVal) => {
+                      const y = getScatterY(tickVal);
+                      return (
+                        <g key={`y-grid-${tickVal}`}>
+                          <line
+                            x1={sPadding.left}
+                            y1={y}
+                            x2={sWidth - sPadding.right}
+                            y2={y}
+                            stroke="#f1f5f9"
+                            strokeDasharray="3 3"
+                            strokeWidth="1"
+                          />
+                          <text
+                            x={sPadding.left - 12}
+                            y={y + 4}
+                            textAnchor="end"
+                            fontSize="11"
+                            fill="#64748b"
+                            fontFamily="monospace"
+                            className="font-medium"
+                          >
+                            {tickVal}%
+                          </text>
+                        </g>
+                      );
+                    })}
+
+                    {activeDomain.ticks.map((tickVal) => {
+                      const x = getScatterX(tickVal);
+                      if (x < sPadding.left || x > sWidth - sPadding.right) return null;
+                      return (
+                        <g key={`x-grid-${tickVal}`}>
+                          <line
+                            x1={x}
+                            y1={sPadding.top}
+                            x2={x}
+                            y2={sHeight - sPadding.bottom}
+                            stroke="#f1f5f9"
+                            strokeDasharray="3 3"
+                            strokeWidth="1"
+                          />
+                          <line
+                            x1={x}
+                            y1={sHeight - sPadding.bottom}
+                            x2={x}
+                            y2={sHeight - sPadding.bottom + 5}
+                            stroke="#94a3b8"
+                            strokeWidth="1.5"
+                          />
+                          <text
+                            x={x}
+                            y={sHeight - sPadding.bottom + 18}
+                            textAnchor="middle"
+                            fontSize="10"
+                            fill="#64748b"
+                            fontFamily="monospace"
+                            className="font-medium"
+                          >
+                            ${tickVal >= 1 ? tickVal.toFixed(2) : tickVal.toFixed(2)}
+                          </text>
+                        </g>
+                      );
+                    })}
+
+                    <line
+                      x1={sPadding.left}
+                      y1={sHeight - sPadding.bottom}
+                      x2={sWidth - sPadding.right}
+                      y2={sHeight - sPadding.bottom}
+                      stroke="#94a3b8"
+                      strokeWidth="1.5"
+                    />
+                    <line
+                      x1={sPadding.left}
+                      y1={sPadding.top}
+                      x2={sPadding.left}
+                      y2={sHeight - sPadding.bottom}
+                      stroke="#94a3b8"
+                      strokeWidth="1.5"
+                    />
+
+                    <text
+                      x={sPadding.left + sInnerWidth / 2}
+                      y={sHeight - 16}
+                      textAnchor="middle"
+                      fontSize="12"
+                      fontWeight="bold"
+                      fill="#334155"
+                    >
+                      Token Rate: {costMetric === 'input' ? 'Input Cost per 1M Tokens ($)' : costMetric === 'output' ? 'Output Cost per 1M Tokens ($)' : 'Blended Cost per 1M Tokens ($)'} (Logarithmic Scale)
+                    </text>
+
+                    {/* Properly closed text tag for the vertical axis label */}
+                    <text
+                      x={-(sPadding.top + sInnerHeight / 2)}
+                      y={24}
+                      textAnchor="middle"
+                      transform="rotate(-90)"
+                      fontSize="12"
+                      fontWeight="bold"
+                      fill="#334155"
+                    >
+                      {currentYConfig.label}
+                    </text>
+
+                    {}
+                    {costScoreModels.map((m) => {
+                      const cost = getModelCost(m);
+                      const score = m.scores[scatterBenchmark];
+                      const cx = getScatterX(cost);
+                      const cy = getScatterY(score);
+                      const isHovered = hoveredScatterModel?.name === m.name;
+                      const isApex = m.tier.includes('Apex');
+                      const radius = isHovered ? 11 : isApex ? 8.5 : 6.5;
+                      const pointColor = colors[m.company];
+
+                      // Dynamic label offset depending on position to eliminate collisions
+                      const isRightSide = cx > sPadding.left + sInnerWidth * 0.72;
+                      const isTopSide = cy < sPadding.top + sInnerHeight * 0.3;
+                      const labelDx = isRightSide ? -14 : 14;
+                      const labelDy = isTopSide ? 16 : -8;
+                      const textAnchor = isRightSide ? 'end' : 'start';
+
+                      return (
+                        <g key={`scatter-pt-${m.name}`} className="cursor-pointer">
+                          {isHovered && (
+                            <circle
+                              cx={cx}
+                              cy={cy}
+                              r={radius + 8}
+                              fill={pointColor}
+                              opacity="0.25"
+                              className="transition-all duration-300 ease-out"
+                            />
+                          )}
+
+                          {isApex && (
+                            <rect
+                              x={cx - (radius + 2.5)}
+                              y={cy - (radius + 2.5)}
+                              width={(radius + 2.5) * 2}
+                              height={(radius + 2.5) * 2}
+                              transform={`rotate(45, ${cx}, ${cy})`}
+                              fill="none"
+                              stroke={pointColor}
+                              strokeWidth="1.5"
+                              strokeDasharray="2 2"
+                              opacity="0.75"
+                              className="transition-all duration-300 ease-out"
+                            />
+                          )}
+
+                          <circle
+                            cx={cx}
+                            cy={cy}
+                            r={radius}
+                            fill={pointColor}
+                            stroke="#ffffff"
+                            strokeWidth={isApex ? '2.5' : '1.5'}
+                            onMouseEnter={() => setHoveredScatterModel({ ...m, cx, cy, cost, score })}
+                            onMouseLeave={() => setHoveredScatterModel(null)}
+                            className="transition-all duration-300 ease-out"
+                          />
+
+                          <text
+                            x={cx + labelDx}
+                            y={cy + labelDy}
+                            textAnchor={textAnchor}
+                            fill="#1e293b"
+                            fontSize="11"
+                            fontWeight={isApex ? 'bold' : '600'}
+                            stroke="#ffffff"
+                            strokeWidth="3.5"
+                            paintOrder="stroke fill"
+                            strokeLinejoin="round"
+                            className="pointer-events-none select-none transition-all duration-300 ease-out"
+                          >
+                            {m.name} <tspan fill="#64748b" fontSize="9" fontWeight="500">({isApex ? 'Apex' : 'Light'})</tspan>
+                          </text>
+                        </g>
+                      );
+                    })}
+                  </svg>
+
+                  {hoveredScatterModel && (
+                    <div
+                      className="absolute z-20 bg-slate-900/95 backdrop-blur text-white text-xs px-4 py-3 rounded-xl shadow-xl pointer-events-none transform -translate-x-1/2 -translate-y-full mt-[-12px] border border-slate-700 min-w-[210px]"
+                      style={{
+                        left: `${(hoveredScatterModel.cx / sWidth) * 100}%`,
+                        top: `${(hoveredScatterModel.cy / sHeight) * 100}%`
+                      }}
+                    >
+                      <div className="flex items-center justify-between gap-2 border-b border-slate-700/80 pb-1.5 mb-2">
+                        <span className="font-extrabold text-sm" style={{ color: colors[hoveredScatterModel.company] }}>
+                          {hoveredScatterModel.name}
+                        </span>
+                        <span className="text-[9px] uppercase px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 font-bold">
+                          {hoveredScatterModel.company}
+                        </span>
+                      </div>
+
+                      <div className="space-y-1 font-mono text-[11px]">
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Score ({scatterBenchmark.toUpperCase()}):</span>
+                          <span className="font-bold text-white">{hoveredScatterModel.score.toFixed(1)}%</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Input Rate:</span>
+                          <span className="font-bold text-emerald-400">${hoveredScatterModel.inputCost.toFixed(2)} / 1M</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Output Rate:</span>
+                          <span className="font-bold text-emerald-400">${hoveredScatterModel.outputCost.toFixed(2)} / 1M</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Context Window:</span>
+                          <span className="text-slate-300">{hoveredScatterModel.context}</span>
+                        </div>
+                        <div className="flex justify-between pt-1 border-t border-slate-800 text-[10px]">
+                          <span className="text-indigo-300">Value Efficiency:</span>
+                          <span className="font-bold text-indigo-300">
+                            {(hoveredScatterModel.score / Math.max(0.2, hoveredScatterModel.cost)).toFixed(1)} pts / $
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="absolute w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-slate-900 left-1/2 bottom-[-6px] transform -translate-x-1/2" />
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {}
+          {activeTab === 'pricing' && (
+            <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+              <div className="flex flex-col md:flex-row md:items-center justify-between pb-5 border-b border-slate-100 gap-4">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="p-1.5 bg-indigo-50 rounded-lg text-indigo-600">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </span>
+                    <h2 className="text-xl font-bold text-slate-900">Apex Flagship Token Economics & Pricing</h2>
+                  </div>
+                  <p className="text-sm text-slate-500 mt-1">
+                    Comparing API token costs per million tokens, prompt caching discounts, and context windows.
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-lg text-xs font-semibold self-start md:self-auto">
+                  {Object.keys(scenarios).map((key) => (
+                    <button
+                      key={key}
+                      onClick={() => setPricingScenario(key)}
+                      className={`px-3 py-1.5 rounded-md transition-all ${
+                        pricingScenario === key ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+                      }`}
+                    >
+                      {scenarios[key].title}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mt-6">
+                {Object.entries(flagshipPricing).map(([company, info]) => {
+                  const maxOutput = 50.0;
+                  const outputWidth = (info.outputPerM / maxOutput) * 100;
+                  const inputWidth = (info.inputPerM / maxOutput) * 100;
+                  const scenarioCost = calculateScenarioCost(company, pricingScenario);
+
+                  return (
+                    <div
+                      key={`pricing-${company}`}
+                      className="bg-slate-50 rounded-xl p-5 border border-slate-200/80 hover:border-slate-300 transition-all flex flex-col justify-between"
+                    >
+                      <div>
+                        <div className="flex justify-between items-start mb-2">
+                          <div>
+                            <span className="text-xs font-bold tracking-wider uppercase text-slate-400">{company}</span>
+                            <h3 className="text-lg font-extrabold text-slate-900" style={{ color: info.color }}>
+                              {info.model}
+                            </h3>
+                          </div>
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-200/70 text-slate-700">
+                            {info.badge}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-2 mb-4 text-xs font-medium text-slate-600">
+                          <span className="inline-flex items-center gap-1 bg-white px-2 py-0.5 rounded border border-slate-200">
+                            <svg className="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 7v10c0 2 1 3 3 3h10c2 0 3-1 3-3V7c0-2-1-3-3-3H7C5 4 4 5 4 7z" />
+                            </svg>
+                            {info.contextWindow}
+                          </span>
+                        </div>
+
+                        <div className="grid grid-cols-3 gap-2 bg-white p-3 rounded-lg border border-slate-150 shadow-2xs mb-4 text-center">
+                          <div>
+                            <div className="text-[10px] text-slate-400 font-semibold uppercase">Input</div>
+                            <div className="text-sm font-black text-slate-800">${info.inputPerM.toFixed(2)}</div>
+                            <div className="text-[9px] text-slate-400">/ 1M</div>
+                          </div>
+                          <div className="border-x border-slate-100">
+                            <div className="text-[10px] text-emerald-600 font-semibold uppercase">Cached</div>
+                            <div className="text-sm font-black text-emerald-700">${info.cachedInputPerM.toFixed(2)}</div>
+                            <div className="text-[9px] text-slate-400">/ 1M</div>
+                          </div>
+                          <div>
+                            <div className="text-[10px] text-slate-400 font-semibold uppercase">Output</div>
+                            <div className="text-sm font-black text-slate-800">${info.outputPerM.toFixed(2)}</div>
+                            <div className="text-[9px] text-slate-400">/ 1M</div>
+                          </div>
+                        </div>
+
+                        <div className="space-y-2 mb-4">
+                          <div>
+                            <div className="flex justify-between text-[11px] font-medium text-slate-500 mb-1">
+                              <span>Input Rate</span>
+                              <span>${info.inputPerM.toFixed(2)} / 1M</span>
+                            </div>
+                            <div className="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
+                              <div className="h-1.5 rounded-full" style={{ width: `${inputWidth}%`, backgroundColor: info.color }} />
+                            </div>
+                          </div>
+
+                          <div>
+                            <div className="flex justify-between text-[11px] font-medium text-slate-500 mb-1">
+                              <span>Output Rate</span>
+                              <span>${info.outputPerM.toFixed(2)} / 1M</span>
+                            </div>
+                            <div className="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
+                              <div className="h-1.5 rounded-full" style={{ width: `${outputWidth}%`, backgroundColor: info.color }} />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="bg-white p-3 rounded-lg border border-slate-200/90 mt-2">
+                        <div className="flex justify-between items-center text-xs">
+                          <span className="font-medium text-slate-500">Estimated Query Cost:</span>
+                          <span className="text-base font-extrabold text-slate-900">${scenarioCost}</span>
+                        </div>
+                        <div className="text-[10px] text-slate-400 mt-0.5 text-right font-mono">
+                          {scenarios[pricingScenario].title}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="mt-5 p-3.5 bg-indigo-50/60 rounded-xl border border-indigo-100 flex flex-col md:flex-row md:items-center justify-between text-xs text-indigo-900 gap-2">
+                <div className="flex items-center gap-2">
+                  <span className="font-bold flex items-center gap-1">
+                    <svg className="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Key Takeaway:
+                  </span>
+                  <span>
+                    <strong>Gemini 4 Argon</strong> provides the lowest apex frontier rates ($2.00/M in, $10.00/M out) with a 4M window, while{' '}
+                    <strong>Claude Opus 5.5</strong> delivers top HLE reasoning at $4.00/$20.00 ($0.20 cached), and <strong>GPT-6 Astra</strong> occupies the premium research tier at $10.00/$50.00.
+                  </span>
+                </div>
+                <div className="text-[11px] text-indigo-700 shrink-0 font-medium">
+                  *Standardized per 1,000,000 tokens (USD).
+                </div>
+              </div>
+            </div>
+          )}
+
+          {}
+          <footer className="mt-6 text-xs text-slate-500 px-2 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-t border-slate-200/60 pt-4">
+            <div>
+              * <strong>Historical Context:</strong> GPT-4.5 was deployed in Feb 2025 prior to the optimized GPT-4.1 series.
+            </div>
+            <div className="text-[11px] text-slate-400">
+              Evaluations based on official technical papers & research consortium submissions.
+            </div>
+          </footer>
+        </div>
+      );
+    };
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<AIModelChart />);
+  </script>
+</body>
+</html>
